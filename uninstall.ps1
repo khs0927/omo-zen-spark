@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   omo-zen-spark 설치 되돌리기. 인스톨러가 만든 타임스탬프 백업 중 최신본으로 복원한다.
 .EXAMPLE

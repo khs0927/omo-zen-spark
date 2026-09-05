@@ -15,7 +15,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/khs
 
 ## 하는 일
 
-1. `opencode` 미설치 시 공식 인스톨러(`opencode.ai/install.ps1`)로 설치
+1. `opencode` 미설치 시 npm → choco → scoop 순으로 설치 시도 (공식 문서 기준 Windows 경로)
 2. 기존 설정 타임스탬프 백업 (`opencode.json.*.bak` 등)
 3. `opencode.json` / `opencode.jsonc` 병합 — **mcp/provider 섹션은 그대로 보존**하고 아래만 고정
    - `model` / `small_model` = `opencode/muse-spark-1.3-contributor-free`
@@ -23,17 +23,23 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/khs
      explore, librarian, Metis, Momus, multimodal-looker, oracle, plan,
      general, compaction, summary, title, Sisyphus-Junior)
    - `instructions`에 Zen 모델 정책 추가, `plugin: oh-my-openagent@latest` 보장
-4. `oh-my-openagent.jsonc` 기록 — `agents.*` 14종 + `categories.*` 8종 Spark 고정.
+4. OMO 핀 기록 — `~/.config/opencode/oh-my-openagent.jsonc` + `~/.omo/omo.jsonc` 둘 다
+   (`agents.*` 14종 + `categories.*` 8종 Spark 고정).
    OMO 4.19.4의 explore/librarian 하드코딩 체인에는 Zen 항목이 없어서,
    이 파일 없이는 EOL 모델(deepseek-v4-flash)로 떨어진다. **진짜 서브에이전트 모델은 이 파일이 결정한다.**
+   신버전 정식 위치(`~/.omo/omo.jsonc`)에도 동일 내용을 써서 버전 무관 고정.
+   플러그인 등록(`opencode plugin oh-my-openagent@latest -g`)도 시도한다.
 5. 검증 출력: `opencode models` Zen 노출 여부, spark/foreign `model` 필드 카운트
 
-## 설치 후 확인
+## 설치 후 확인 (새 컴퓨터 필수)
 
-```powershell
-opencode models | Select-String "muse-spark-1.3"
-opencode debug agent explore 2>&1 | Select-String "muse-spark-1.3-contributor-free"
-```
+1. Zen 로그인: opencode 실행 후 `/connect` → opencode 선택 → https://opencode.ai/auth
+   (`opencode models`에 `muse-spark-1.3`이 안 뜨면 이 단계가 빠진 것이다)
+2. ```powershell
+   opencode models | Select-String "muse-spark-1.3"
+   opencode debug agent explore 2>&1 | Select-String "muse-spark-1.3-contributor-free"
+   ```
+3. 추가 진단: `bunx oh-my-openagent doctor` (플러그인·설정·모델·환경 점검)
 
 서브에이전트 스모크 테스트가 이 repo 검증에 사용됐다:
 
@@ -51,9 +57,10 @@ opencode debug agent explore 2>&1 | Select-String "muse-spark-1.3-contributor-fr
 
 | 파일 | 역할 |
 |---|---|
-| `install.ps1` | 논스톱 인스톨러 (단일 파일, 외부 의존 없음) |
+| `install.ps1` | 논스톱 인스톨러 (단일 파일, 외부 의존 없음, PS 5.1/7 지원) |
 | `uninstall.ps1` | 백업 복원 |
 | `configs/oh-my-openagent.jsonc` | OMO 핀 템플릿 (인스톨러가 동일 내용 생성) |
+| `configs/omo.jsonc` | 신버전 정식 위치용 동일 템플릿 (`~/.omo/omo.jsonc`) |
 | `configs/AGENTS.template.md` | 프로젝트용 `AGENTS.md` 템플릿 |
 | `versions.txt` | 검증된 버전 기록 |
 
