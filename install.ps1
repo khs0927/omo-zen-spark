@@ -1,5 +1,5 @@
 ﻿<#PSScriptInfo>
-.VERSION 1.1.0
+.VERSION 1.3.0
 .GUID 7c2e4a1b-9f3d-4c5a-b8e1-omo-zen-spark01
 .AUTHOR omo-zen-spark
 .DESCRIPTION Nonstop installer: OMO + OPENCODE ZEN MUSE SPARK 1.3 FREE model pin.
@@ -12,8 +12,8 @@
   1. opencode 미설치 시 npm -> choco -> scoop 순으로 설치 시도
   2. 기존 설정 백업(타임스탬프)
   3. model/small_model + agent 17종 + instructions + plugin 병합
-  4. oh-my-openagent.jsonc + ~/.omo/omo.jsonc 기록 (agents 14 + categories 8)
-     - 구버전(4.x)은 전자를, 신버전은 후자를 정식 위치로 읽는다. 둘 다 써서 버전 무관 고정.
+  4. OMO 핀 기록 — 정식 위치 ~/.omo/omo.jsonc only, canonical 'model' 형식
+     (구버전 위치 oh-my-openagent.jsonc는 unified chain 경고를 내므로 작성하지 않고, 있으면 백업 후 제거)
   5. 플러그인 등록 시도 + 검증 출력
   설치 후 opencode를 완전히 재시작해야 적용된다.
 .EXAMPLE
@@ -98,11 +98,46 @@ function Set-ModelPins {
 }
 
 function New-OmoObject {
+  # Canonical format for OMO 4.19.4+ unified config: 'model' only.
+  # 'fallback_models' is rejected by unified-config validation and flagged
+  # deprecated by doctor, so it is intentionally not emitted.
+  # explore carries a Spark-compatible `prompt` (tools-first): the stock
+  # explore prompt demands <analysis> first and Spark stops after it with
+  # zero tool calls. Verified by subagent smoke test.
+  $ExplorePrompt = @'
+You are a codebase search specialist. Your job: find files and code, return actionable results.
+
+## EXECUTION RULE (highest priority, overrides everything below)
+Your FIRST response must contain 3 or more PARALLEL tool calls (glob/grep/read/LSP). Never respond with text only — a text-only response is a FAILED response. State your intent in ONE line, then call tools immediately in the same response.
+
+## Mission
+Answer questions like: Where is X implemented? Which files contain Y? Find the code that does Z.
+
+## Results format
+End every task with:
+<results>
+<files>
+- /absolute/path/to/file - why this file is relevant
+</files>
+<answer>
+Direct answer to the actual need, not just a file list.
+</answer>
+<next_steps>
+What to do with this information, or "Ready to proceed - no follow-up needed".
+</next_steps>
+</results>
+
+## Rules
+- ALL paths must be absolute. Read-only: never create, modify, or delete files. No emojis.
+- Tool strategy: LSP tools for definitions/references, grep for text patterns, glob for filenames, git for history. Flood with parallel calls and cross-validate.
+'@
   $agents = New-Object PSObject
   foreach ($name in $OmoAgents) {
     $entry = New-Object PSObject
     Set-NoteProperty -Object $entry -Name "model" -Value $Model
-    Set-NoteProperty -Object $entry -Name "fallback_models" -Value @($Model)
+    if ($name -eq "explore") {
+      Set-NoteProperty -Object $entry -Name "prompt" -Value $ExplorePrompt
+    }
     Set-NoteProperty -Object $agents -Name $name -Value $entry
   }
   $categories = New-Object PSObject
@@ -158,12 +193,15 @@ if (-not $jsonAttached -and -not $jsoncAttached) {
   if ($jsoncAttached) { Set-ModelPins -Path (Join-Path $ConfigDir "opencode.jsonc") -WithPlugin $true }
 }
 
-# 3. OMO 핀 기록 (구버전 위치 + 신버전 정식 위치 둘 다)
+# 3. OMO 핀 기록 (정식 위치 ~/.omo/omo.jsonc only — canonical 'model' 형식)
+# 구버전 위치(oh-my-openagent.jsonc)는 unified chain에서 경고를 내므로 남기지 않는다.
 $omo = New-OmoObject
 $omoLegacy = Join-Path $ConfigDir "oh-my-openagent.jsonc"
-Backup-File -Path $omoLegacy
-($omo | ConvertTo-Json -Depth 20) | Set-Content -LiteralPath $omoLegacy -Encoding UTF8
-Write-Host "[pinned] $omoLegacy"
+if (Test-Path -LiteralPath $omoLegacy) {
+  Backup-File -Path $omoLegacy
+  Remove-Item -LiteralPath $omoLegacy -Force
+  Write-Host "[removed legacy] $omoLegacy (unified config only)"
+}
 $omoHome = Join-Path $HOME ".omo"
 if (-not (Test-Path -LiteralPath $omoHome)) { New-Item -ItemType Directory -Path $omoHome -Force | Out-Null }
 $omoNew = Join-Path $omoHome "omo.jsonc"

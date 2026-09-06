@@ -25,4 +25,5 @@ function Restore-Latest {
 Restore-Latest -Path (Join-Path $ConfigDir "opencode.json")
 Restore-Latest -Path (Join-Path $ConfigDir "opencode.jsonc")
 Restore-Latest -Path (Join-Path $ConfigDir "oh-my-openagent.jsonc")
+Restore-Latest -Path (Join-Path $HOME ".omo/omo.jsonc")
 Write-Host "DONE. Restart opencode completely to apply."

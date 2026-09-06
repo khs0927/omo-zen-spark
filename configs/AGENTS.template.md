@@ -39,3 +39,9 @@ opencode models | Select-String "muse-spark-1.3"
 opencode debug config 2>$null | Select-String '"model": "opencode/muse-spark-1.3-contributor-free"' | Measure-Object
 opencode debug agent explore 2>&1 | Select-String "muse-spark-1.3-contributor-free"
 ```
+
+```bash
+opencode models | grep "muse-spark-1.3"
+opencode debug config 2>/dev/null | grep -o '"model": "opencode/muse-spark-1.3-contributor-free"' | wc -l
+opencode debug agent explore 2>&1 | grep "muse-spark-1.3-contributor-free"
+```

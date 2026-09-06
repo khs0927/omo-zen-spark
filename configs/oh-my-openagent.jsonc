@@ -1,32 +1,78 @@
 {
-  // OMO — OPENCODE ZEN / MUSE SPARK 1.3 FREE (global pin).
-  // Every agent + every task category resolves to Zen Spark only.
-  // This overrides OMO's hardcoded fallbackChain (which otherwise falls
-  // back to deepseek-v4-flash / gpt-5.6-luna-fast and fails with 410).
-  "agents": {
-    "sisyphus": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "hephaestus": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "prometheus": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "atlas": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "metis": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "momus": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "oracle": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "librarian": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "explore": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "multimodal-looker": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "build": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "plan": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "sisyphus-junior": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] },
-    "OpenCode-Builder": { "model": "opencode/muse-spark-1.3-contributor-free", "fallback_models": ["opencode/muse-spark-1.3-contributor-free"] }
-  },
-  "categories": {
-    "visual-engineering": { "model": "opencode/muse-spark-1.3-contributor-free" },
-    "ultrabrain": { "model": "opencode/muse-spark-1.3-contributor-free" },
-    "deep": { "model": "opencode/muse-spark-1.3-contributor-free" },
-    "artistry": { "model": "opencode/muse-spark-1.3-contributor-free" },
-    "quick": { "model": "opencode/muse-spark-1.3-contributor-free" },
-    "unspecified-low": { "model": "opencode/muse-spark-1.3-contributor-free" },
-    "unspecified-high": { "model": "opencode/muse-spark-1.3-contributor-free" },
-    "writing": { "model": "opencode/muse-spark-1.3-contributor-free" }
+// OMO — OPENCODE ZEN / MUSE SPARK 1.3 FREE (global pin).
+// Every agent + every task category resolves to Zen Spark only.
+// Canonical format for OMO 4.19.4+ unified config: 'model' only.
+// NOTE: 'fallback_models' is rejected by unified-config validation
+// ("Invalid omo config") and flagged deprecated by doctor, so it is
+// intentionally NOT used here. Verified with `bunx oh-my-openagent doctor`.
+    "agents": {
+      "sisyphus": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "hephaestus": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "prometheus": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "atlas": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "metis": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "momus": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "oracle": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "librarian": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "explore": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "multimodal-looker": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "build": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "plan": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "sisyphus-junior": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "OpenCode-Builder": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      }
+    },
+    "categories": {
+      "visual-engineering": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "ultrabrain": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "deep": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "artistry": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "quick": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "unspecified-low": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "unspecified-high": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      },
+      "writing": {
+        "model": "opencode/muse-spark-1.3-contributor-free"
+      }
+    }
   }
-}
