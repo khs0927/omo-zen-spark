@@ -63,24 +63,37 @@ bunx oh-my-openagent doctor
 ./uninstall.sh   # 최신 타임스탬프 백업으로 복원
 ```
 
-## 5. 실측 검증 기록 (2026-09-06, 이 머신)
+## 5. 실측 검증 기록 (2026-09-07, 이 머신)
 
-- `doctor` → exit 0 (경고 1건만: 로컬 모델 메타데이터에 spark 미등록 — 무해, `opencode models`에는 live 노출)
+동일 스모크 과제(`*.sh` 목록 + `--help` 핸들러 판별, glob/read 최대 2파일)로 explore 호출:
+
+- 기준선(스톡 프롬프트): 메시지 2개, `<analysis>`만 출력, 도구 0회, `<results>` 없음 —
+  스톡 프롬프트가 "검색 전 `<analysis>` 텍스트"를 요구하고 Spark가 거기서 멈추기 때문
+- 라이브 단축 프롬프트 적용 직후(재시작 전) 재실행: 동일하게 스톨 —
+  에이전트 설정은 시작 시(`applyAgentConfig`)에 baked되므로 재시작 전까지 미적용
+- A (단문 규칙을 호출자 메시지로 전달): 메시지 4개, 첫 턴에 1줄 + 병렬 도구 3개,
+  후속 read 2회, `<results>` 정상 (install.sh 252줄·usage L31 등 정확한 근거 포함)
+- B (전문 규칙을 호출자 메시지로 전달): 메시지 4개, 첫 턴에 1줄 + 병렬 도구 3개,
+  후속 3회 호출, `<analysis>` + `<results>` 정상
+
+결론: tools-first 지시 자체가 Spark를 unblock함이 실측으로 확인됨.
+`<analysis>`/`<results>` 계약을 유지하는 전문형을 템플릿·`install.sh` 임베디드 폴백·
+`install.ps1`에 동일 문구로 baked (3곳 프롬프트 문자열 byte-identical 확인).
+단, 시스템 프롬프트 교체로서의 런타임 효과는 opencode 재시작 후에 발휘되므로,
+재시작한 뒤 `./install.sh --verify-only` + explore 1회 호출로 최종 확인 필요.
+
+- `doctor --json` → exit 0, 전 항목 pass (Models만 warn: spark가 로컬 메타데이터 미등록 —
+  무해, `opencode models`에는 live 노출)
 - `debug config` → spark 5건, 외부(openai/anthropic) 모델 0건
-- 서브에이전트 스모크 (모두 spark, 빌링 에러 없음)
-  - librarian: 모델 자가 보고 + 정상 답변
-  - quick(Sisyphus-Junior): 실제 `glob`+`read` 실행, `versions.txt` 정확히 반환
-  - explore: 수정 전 `<analysis>`만 출력하고 도구 0회로 3회 실패 →
-    `prompt` 교체(tools-first) 후 첫 응답에서 도구 3개 병렬 호출 + `<results>` 정상 반환
 
 ## 6. 알려진 사항
 
 - **Hephaestus 자동 전환**: spark 고정에도 OMO의 `no-hephaestus-non-gpt` 훅이
-  Hephaestus 호출을 Sisyphus(spark)로 돌린다. 과금은 spark-only로 유지되므로
-  기본값 유지를 권장. 문자 그대로 Hephaestus-on-spark를 원하면
-  `~/.omo/omo.jsonc`에 `"disabled_hooks": ["no-hephaestus-non-gpt"]` 추가
-  (단, OMO 4.19.4 검증기가 `agents` 아래 `disabled_hooks` 키를 거부하므로
-  동작 미보장 — 수동 검증 필요).
+  Hephaestus 호출을 Sisyphus(spark)로 돌린다 (패키지 코드에서 동작 확인:
+  비-GPT 모델이면 `input.agent`를 sisyphus로 rewrite, 기본값). 과금은 spark-only로
+  유지되므로 기본값 유지를 권장. 문자 그대로 Hephaestus-on-spark를 원하면
+  hephaestus 오버라이드의 `allow_non_gpt_model` 옵션을 확인할 것
+  (스키마에는 존재, 런타임 미검증 — 수동 검증 필요).
 - **opencode 버전**: 검증된 버전은 1.18.29, 이 머신은 1.14.39에서도 정상 동작.
   업그레이드하려면 `npm i -g opencode-ai@latest` 후 opencode 재시작.
 - **스키마 주의**: OMO 4.19.4 검증기는 `agents`/`categories`에
